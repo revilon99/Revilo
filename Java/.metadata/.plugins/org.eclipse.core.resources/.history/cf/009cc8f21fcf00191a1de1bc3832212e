@@ -1,0 +1,95 @@
+package cass.oli.revilo;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+public class Home extends Game {
+	private static final long serialVersionUID = 1L;
+	final int spriteRatio = 10;
+	int nIcons = 3;
+	BufferedImage[] games = new BufferedImage[nIcons];
+	
+	public Home(Revilo revilo) {
+		super(revilo);
+		try {
+			games[0] = ImageIO.read(getClass().getResource("/res/Pong.png"));
+			games[1] = ImageIO.read(getClass().getResource("/res/Mandelbrot.png"));
+			games[2] = ImageIO.read(getClass().getResource("/res/Boids.png"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	@Override
+	public void leftClick(int x, int y) {
+		int iconWidth = Math.round(width / spriteRatio);
+		int offset = Math.round((width - nIcons*iconWidth)/(nIcons + 1));
+		int iconY = Math.round((height - iconWidth) / 2);
+		if(y < iconY || y > iconY + iconWidth) return;
+		if(x > offset && x < offset + iconWidth) revilo.setGame(revilo.games.get(1));
+		if(x > 2*offset + width && x < 2*(offset + iconWidth)) revilo.setGame(revilo.games.get(2));
+		if(x > 3*offset + 2* iconWidth && x < 3*(offset + iconWidth)) revilo.setGame(revilo.games.get(3));
+
+	}
+
+	@Override
+	public void rightClick(int x, int y) {
+		//Do Nothing
+	}
+
+	@Override
+	protected void tick() {
+		//Do Nothing for now
+	}
+
+	@Override
+	protected void render() {
+		BufferStrategy bs = this.getBufferStrategy();
+		if(bs == null){
+			this.createBufferStrategy(3);
+			return;
+		}
+		
+		Graphics g1 = bs.getDrawGraphics();
+		Graphics2D g = (Graphics2D) g1;
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
+		        RenderingHints.VALUE_ANTIALIAS_ON);
+
+		//Background
+		g.setColor(Color.black);
+		g.fillRect(0, 0, width, height);
+		
+		int border = 2;
+		int iconWidth = Math.round(width / spriteRatio);
+		int offset = Math.round((width - nIcons*iconWidth)/(nIcons + 1));
+		int y = Math.round((height - iconWidth) / 2);
+		
+		g.setColor(Color.white);
+		g.fillRect(offset-border, y-border, iconWidth + 2*border, iconWidth + border*2);
+		g.drawImage(games[0], offset, y, iconWidth, iconWidth, null);
+		g.fillRect(2*offset + iconWidth-border, y-border, iconWidth + 2*border, iconWidth + border*2);
+		g.drawImage(games[1], 2*offset + iconWidth, y, iconWidth, iconWidth, null);
+		g.fillRect(3*offset + 2*iconWidth-border, y-border, iconWidth + 2*border, iconWidth + border*2);
+		g.drawImage(games[2], 3*offset + 2*iconWidth, y, iconWidth, iconWidth, null);
+
+		
+		g.dispose();
+		try{
+			bs.show();
+		}catch(Exception e){}
+	}
+
+	@Override
+	public void dragTo(int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

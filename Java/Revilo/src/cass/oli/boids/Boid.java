@@ -126,7 +126,7 @@ public class Boid {
 		int count = 0;
 		for(Boid b : boids) {
 			double d = Vec.dist(loc, b.loc);
-			if(d < RADIUS / 1.5) {
+			if(d < RADIUS / 1.8) {
 				steer.add(b.vel);
 				count++;
 			}
@@ -149,7 +149,7 @@ public class Boid {
 		
 		for(Boid b : boids) {
 			double d = Vec.dist(loc, b.loc);
-			if(d < RADIUS / 1.5) {
+			if(d < RADIUS / 1.6) {
 				target.add(b.loc);
 				count++;
 			}

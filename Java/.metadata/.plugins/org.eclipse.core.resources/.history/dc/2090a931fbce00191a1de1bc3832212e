@@ -1,0 +1,37 @@
+import java.awt.event.MouseEvent;
+
+import javax.swing.event.MouseInputAdapter;
+
+class Mouse extends MouseInputAdapter {
+	Game game;
+	public void mouseClicked(MouseEvent me) {
+		if(me.getButton() == MouseEvent.BUTTON1) {
+			game.leftClick(me.getX(), me.getY());
+		}
+		if(me.getButton() == MouseEvent.BUTTON3) {
+			game.rightClick(me.getX(), me.getY());
+		}
+	}
+	public void mousePressed(MouseEvent e) {
+        game.mouseX = e.getX();
+        game.mouseY = e.getY();
+    }
+	public void mouseDragged(MouseEvent e) {
+		game.dragging = true;
+		game.dragX = e.getX();
+		game.dragY = e.getY();
+	}
+	public void mouseMoved(MouseEvent e) {
+		 game.mouseX = e.getX();
+	     game.mouseY = e.getY();
+	}
+	 public void mouseReleased(MouseEvent e) {
+         game.dragTo(e.getX(), e.getY());
+         game.dragging = false;
+     }
+	
+	public Mouse(Game game) {
+		this.game = game;
+	}
+
+}

@@ -1,29 +1,28 @@
 package cass.oli.pong;
 
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 
-public class Pong extends Canvas implements Runnable{
-	private static final long serialVersionUID = 1L;
+import cass.oli.revilo.Game;
+import cass.oli.revilo.Revilo;
+
+public class Pong extends Game{
 	
-	public int HEIGHT = 720, WIDTH = 1280;
 	public static final float EPSILON_TIME = 1e-2f; //Threshold for zero time
-	private static final int UPDATE_RATE = 60; //60 FPS
-	private boolean running = true;
 	public BoxContainer box;
 	public ArrayList<GameObject> objects = new ArrayList<GameObject>();
 	public ArrayList<GameObject> addObjects = new ArrayList<GameObject>();
 	public ArrayList<GameObject> removeObjects = new ArrayList<GameObject>();
 	private int objID = 0;
+	private final int spriteRatio = 10;
 	
+	public Pong(Revilo revilo) {
+		super(revilo);
+		box = new BoxContainer(0, 0, width, height);
+	}
 	public Pong() {
-		this.setSize(WIDTH, HEIGHT);
-		box = new BoxContainer(0, 0, WIDTH, HEIGHT);
+		box = new BoxContainer(0, 0, width, height);
 	}
 	
 	public void tap(int x, int y) {
@@ -31,44 +30,65 @@ public class Pong extends Canvas implements Runnable{
 		//return after each function
 		
 		//Pause Button
-		if(x > WIDTH - 60 && x < WIDTH - 10 && y > 10 && y < 70) {
-			running = !running;
+		if(x > width - 60 && x < width - 10 && y > 10 && y < 70) {
+			paused = !paused;
 			return;
 		}
-		//Remove Ball
-		for(GameObject object : objects){
-			if(object.shape == Shape.Circle) {
-				Ball ball = (Ball) object;
-				double xDist = x - ball.x;
-	            double yDist = y - ball.y;
-	            double dist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-	            if(dist < ball.radius) {
-	    			//ball.print();
-	                removeBall(ball);
-	                return;
-	            }
+		if(paused) {
+			int nButtons = 1;
+			if(revilo != null) nButtons = 2;
+			int spriteWidth = (int) Math.round(width / spriteRatio); 
+			int offset = (int) Math.round((height - spriteWidth * nButtons)/(nButtons+1));
+			
+			//Reset
+			if(		x > (width - spriteWidth)/2 && x < (width + spriteWidth)/2 &&
+					y > offset && y < offset + spriteWidth) {
+				removeObjects.addAll(objects);
+				paused = false;
+				return;
 			}
+			//Home
+			if(		x > (width - spriteWidth)/2 && x < (width + spriteWidth)/2 &&
+					y > 2*offset + spriteWidth && y < 2*(offset + spriteWidth) && revilo != null) {
+				revilo.game = 0;
+			}
+		}else {
+			//Remove Ball
+			for(GameObject object : objects){
+				if(object.shape == Shape.Circle) {
+					Ball ball = (Ball) object;
+					double xDist = x - ball.x;
+		            double yDist = y - ball.y;
+		            double dist = Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+		            if(dist < ball.radius) {
+		    			//ball.print();
+		                removeBall(ball);
+		                return;
+		            }
+				}
+			}
+			
+			//Add Ball
+			addBall(new Ball(x, y, objID));
+			objID++;	
 		}
-		
-		//Add Ball
-		addBall(new Ball(x, y, objID));
-		objID++;		
 	}
 	
 	public void tick() {
 		float timeLeft = 1.0f;
 		
 		//Synchronises adding and removing objects
-		for(GameObject object : addObjects) {
+		for(int i = 0; i < addObjects.size(); i++) {
+			GameObject object = addObjects.get(i);
 			boolean add = true;
 			
 			switch(object.shape) {
 			case Circle:
 				Ball nBall = (Ball) object;
 				if(        nBall.x - nBall.radius < 0
-						|| nBall.x + nBall.radius > WIDTH
+						|| nBall.x + nBall.radius > width
 						|| nBall.y - nBall.radius < 0
-						|| nBall.y + nBall.radius > HEIGHT) {
+						|| nBall.y + nBall.radius > height) {
 					add = false;
 					break;
 				}
@@ -78,9 +98,6 @@ public class Pong extends Canvas implements Runnable{
 						Ball ball = (Ball) exist;
 						if(ball.ballCollision(nBall)) add = false;
 						break;
-					default:
-						break;
-					
 					}
 				}
 				break;
@@ -122,31 +139,14 @@ public class Pong extends Canvas implements Runnable{
 			//Move
 			for(GameObject object : objects) object.update(tMin);
 			
-			if(tMin > 0.05) { //Do Not Display Small Changes
-				render();
-				try {
-					Thread.sleep((long)(1000L / UPDATE_RATE * tMin));
-				}catch(InterruptedException e) {}
-			}
 			timeLeft -= tMin;
 		}while(timeLeft > EPSILON_TIME);
 	}
 	
-	public void render() {
-		BufferStrategy bs = this.getBufferStrategy();
-		if(bs == null){
-			this.createBufferStrategy(3);
-			return;
-		}
-		
-		Graphics g1 = bs.getDrawGraphics();
-		Graphics2D g = (Graphics2D) g1;
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, // Anti-alias!
-		        RenderingHints.VALUE_ANTIALIAS_ON);
-
+	public void render(Graphics2D g){
 		//Background
 		g.setColor(Color.black);
-		g.fillRect(0, 0, WIDTH, HEIGHT);
+		g.fillRect(0, 0, width, height);
 				
 		//Game Objects
 		for(GameObject object : objects) {
@@ -155,41 +155,33 @@ public class Pong extends Canvas implements Runnable{
 		
 		//Pause Button
 		g.setColor(Color.white);
-		if(running) {
-			g.fillRect(WIDTH - 60, 10, 20, 60);
-			g.fillRect(WIDTH - 30, 10, 20, 60);
+		if(!paused) {
+			g.fillRect(width - 60, 10, 20, 60);
+			g.fillRect(width - 30, 10, 20, 60);
 		}else {
-			int[] xTri = {WIDTH- 60, WIDTH - 10, WIDTH - 60};
+			g.setColor(new Color(0, 0, 0, 150));
+			g.fillRect(0, 0, width, height);
+			g.setColor(Color.white);
+			
+			int nButtons = 1;
+			if(revilo != null) nButtons = 2;
+			int spriteWidth = (int) Math.round(width / spriteRatio); 
+			int offset = (int) Math.round((height - spriteWidth * nButtons)/(nButtons+1));
+			
+			g.drawImage(sprites[1], (width - spriteWidth)/2, offset, spriteWidth, spriteWidth, null);
+			if(revilo != null) g.drawImage(sprites[0], (width - spriteWidth)/2, offset + spriteWidth + offset, spriteWidth, spriteWidth, null);
+			
+			int[] xTri = {width- 60, width - 10, width - 60};
 			int[] yTri = {10, 40, 70};
 			g.fillPolygon(xTri, yTri, 3);
 		}
-		
-		g.dispose();
-		bs.show();
 	}
 	
-	public void run(){
-		while(true) {		
-			long beginTimeMillis, timeTakenMillis, timeLeftMillis;
-			beginTimeMillis = System.currentTimeMillis();
-			
-			if(running)  tick();
-			render();
-			
-			timeTakenMillis = System.currentTimeMillis() - beginTimeMillis;
-			timeLeftMillis = 1000L / UPDATE_RATE - timeTakenMillis;
-			if(timeLeftMillis < 5) timeLeftMillis = 5;
-			
-			try {
-				Thread.sleep(timeLeftMillis);
-			}catch(InterruptedException e) {}
-		}
-	}
-	
-	public void resize() {
-		this.WIDTH = getWidth();
-		this.HEIGHT = getHeight();
-		this.box = new BoxContainer(0, 0, WIDTH, HEIGHT);
+	@Override
+	public void resize(int w, int h) {
+		width = w;
+		height = h;
+		this.box = new BoxContainer(0, 0, width, height);
 	}
 	
 	public void addBall(Ball ball) {
@@ -197,5 +189,19 @@ public class Pong extends Canvas implements Runnable{
 	}
 	public void removeBall(Ball ball) {
 		removeObjects.add(ball);
+	}
+
+	@Override
+	public void leftClick(int x, int y) {
+		tap(x, y);		
+	}
+
+	@Override
+	public void rightClick(int x, int y) {
+		//Do Nothing
+	}
+	@Override
+	public void dragTo(int x, int y) {
+		leftClick(x, y);
 	}
 }

@@ -1,0 +1,39 @@
+package cass.oli.revilo;
+
+import java.awt.event.MouseEvent;
+
+import javax.swing.event.MouseInputAdapter;
+
+public class Mouse extends MouseInputAdapter {
+	Revilo revilo;
+	public void mouseClicked(MouseEvent me) {
+		if(me.getButton() == MouseEvent.BUTTON1) {
+			revilo.game.leftClick(me.getX(), me.getY());
+		}
+		if(me.getButton() == MouseEvent.BUTTON3) {
+			revilo.game.rightClick(me.getX(), me.getY());
+		}
+	}
+	public void mousePressed(MouseEvent e) {
+		revilo.game.mouseX = e.getX();
+        revilo.game.mouseY = e.getY();
+    }
+	public void mouseDragged(MouseEvent e) {
+		revilo.game.dragging = true;
+		revilo.game.dragX = e.getX();
+		revilo.game.dragY = e.getY();
+	}
+	public void mouseMoved(MouseEvent e) {
+		revilo.game.mouseX = e.getX();
+		revilo.game.mouseY = e.getY();
+	}
+	 public void mouseReleased(MouseEvent e) {
+		 revilo.game.dragTo(e.getX(), e.getY());
+		 revilo.game.dragging = false;
+     }
+	
+	public Mouse(Revilo revilo) {
+		this.revilo = revilo;
+	}
+
+}

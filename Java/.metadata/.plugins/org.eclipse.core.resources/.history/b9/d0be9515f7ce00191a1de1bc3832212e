@@ -1,0 +1,5 @@
+package cass.oli.mandelbrot;
+
+public class Mandelbrot_Window {
+
+}

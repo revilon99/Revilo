@@ -1,0 +1,8 @@
+package cass.oli.revilo;
+
+public enum ID {
+	Home,
+	Pong,
+	Boids,
+	Mandelbrot;
+}

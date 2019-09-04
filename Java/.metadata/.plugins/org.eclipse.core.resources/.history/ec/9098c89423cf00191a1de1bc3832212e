@@ -1,0 +1,71 @@
+package cass.oli.boids;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
+
+import cass.oli.maths.Vec;
+import cass.oli.revilo.Game;
+import cass.oli.revilo.Revilo;
+
+public class Boids extends Game implements Runnable{
+	/**
+	 * https://rosettacode.org/wiki/Boids/Java
+	 */
+	private static final long serialVersionUID = 1L;
+	public ArrayList<Boid> boids = new ArrayList<>();
+	
+	
+	private final int num_boids = 75;
+	
+	public Vec target = null;
+	private long target_timeout;
+	
+	public Boids(Revilo revilo) {
+		super(revilo);
+		for(int i = 0; i < num_boids; i++) boids.add(new Boid(this));
+	}
+	
+	public Boids() {
+		for(int i = 0; i < num_boids; i++) boids.add(new Boid(this));
+	}
+	
+	@Override
+	protected void tick() {
+		for(Boid boid : boids) boid.tick();
+		if(target != null & (System.currentTimeMillis() - target_timeout) > 2000) target = null;
+	}
+	
+	@Override
+	protected void render(Graphics2D g){
+		//Background
+		g.setColor(Color.black);
+		g.fillRect(0, 0, width, height);
+		
+		for(Boid boid : boids) boid.render(g);
+	}
+	
+	public void newTarget(int x, int y) {
+		target = new Vec(x, y);
+		target_timeout = System.currentTimeMillis();
+	}
+
+	@Override
+	public void leftClick(int x, int y) {
+		newTarget(x, y);		
+	}
+
+	@Override
+	public void rightClick(int x, int y) {
+		target = null;
+	}
+
+	@Override
+	public void dragTo(int x, int y) {
+		// TODO Auto-generated method stub
+		
+	}
+}

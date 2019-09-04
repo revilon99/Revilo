@@ -1,0 +1,39 @@
+package cass.oli.pong;
+
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JFrame;
+import javax.swing.event.MouseInputAdapter;
+
+import cass.oli.revilo.Mouse;
+
+public class Pong_Window {
+	public static void main(String args[]) {
+		new Pong_Window("Pong", new Pong());
+	}
+	
+	public Pong_Window(String title, Pong pong) {
+		JFrame frame = new JFrame(title);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addComponentListener(new ComponentAdapter() 
+		{  
+	        public void componentResized(ComponentEvent evt) {
+	            pong.resize();
+	        }
+	});
+		
+		Mouse mouse = new Mouse(pong);
+		pong.addMouseListener(mouse);
+		pong.addMouseMotionListener(mouse);
+		
+		frame.add(pong);
+		frame.pack();
+		frame.setResizable(true);
+		frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+		frame.setVisible(true);
+		
+		pong.run();
+	}
+}

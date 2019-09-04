@@ -1,0 +1,38 @@
+package cass.oli.boids;
+
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+
+import javax.swing.JFrame;
+
+import cass.oli.revilo.Mouse;
+
+public class Boid_Window {
+
+	public static void main(String[] args) {
+		new Boid_Window("Boids", new Boids());
+	}
+	
+	public Boid_Window(String title, Boids boids) {
+		JFrame frame = new JFrame(title);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addComponentListener(new ComponentAdapter() 
+		{  
+	        public void componentResized(ComponentEvent evt) {
+	            boids.resize();
+	        }
+	});
+		
+		Mouse mouse = new Mouse(boids);
+		boids.addMouseListener(mouse);
+		boids.addMouseMotionListener(mouse);
+		
+		frame.add(boids);
+		frame.pack();
+		frame.setResizable(true);
+		frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
+		frame.setVisible(true);
+		boids.run();
+	}
+
+}

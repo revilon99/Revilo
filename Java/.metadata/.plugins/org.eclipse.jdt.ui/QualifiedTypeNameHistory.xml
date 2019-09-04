@@ -1,2 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="cass.oli.maths.Vec"/>
+    <fullyQualifiedTypeName name="cass.oli.maths.CollisionPhysics"/>
+    <fullyQualifiedTypeName name="cass.oli.maths.Collision"/>
+    <fullyQualifiedTypeName name="cass.oli.revilo.Game"/>
+    <fullyQualifiedTypeName name="cass.oli.revilo.Revilo"/>
+    <fullyQualifiedTypeName name="cass.oli.revilo.Mouse"/>
+    <fullyQualifiedTypeName name="javax.imageio.ImageIO"/>
+    <fullyQualifiedTypeName name="cass.oli.revilo.Home"/>
+    <fullyQualifiedTypeName name="cass.oli.pong.Pong"/>
+    <fullyQualifiedTypeName name="cass.oli.boids.Boids"/>
+    <fullyQualifiedTypeName name="cass.oli.mandelbrot.Mandelbrot"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="java.awt.image.BufferedImage"/>
+    <fullyQualifiedTypeName name="java.awt.Canvas"/>
+    <fullyQualifiedTypeName name="java.awt.Graphics"/>
+    <fullyQualifiedTypeName name="java.awt.Graphics2D"/>
+    <fullyQualifiedTypeName name="java.awt.Color"/>
+</qualifiedTypeNameHistroy>
