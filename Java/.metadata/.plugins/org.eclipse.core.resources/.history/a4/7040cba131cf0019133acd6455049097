@@ -33,7 +33,7 @@ public class Boids extends Game{
 	@Override
 	protected void tick() {
 		for(Boid boid : boids) boid.tick();
-		if(target != null & (System.currentTimeMillis() - target_timeout) > 2000) target = null;
+		if(target != null & (System.currentTimeMillis() - target_timeout) > 3000) target = null;
 	}
 	
 	@Override

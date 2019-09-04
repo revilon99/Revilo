@@ -1,3 +1,2 @@
 INDEX VERSION 1.131+D:\GitHub\Revilo\Java\.metadata\.plugins\org.eclipse.jdt.core
-1956272881.index
 789344348.index
