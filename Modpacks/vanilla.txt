@@ -1,0 +1,6 @@
+wooden_floor static true
+stone_wall static false
+stone pushable true
+water biome false
+grass biome true
+sand biome true
