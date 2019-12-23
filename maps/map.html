@@ -1,0 +1,195 @@
+<html>
+	<head>
+		<title>Map Generator</title>
+		<style>
+			body{
+				overflow-x: hidden;
+				overflow-y: hidden;
+			}
+			div#mapHolder{
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 60%;
+				height: 100%;
+				border-right: 2px solid;
+				overflow-y: auto;
+			}
+			div#editor{
+				position: absolute;
+				left: 60%;
+				top: 0;
+				width: 40%;
+				height: 100%;
+			}
+			canvas#map{
+				width: 100%;
+			}
+			div#terrainArea{
+				width: 100%;
+				height: 40%;
+				border-bottom: 2px solid;
+			}
+			div#terrainScript{
+				width: 100%;
+				height: 20%;
+				border-bottom: 2px solid;
+			}
+			div#generate{
+				width: 100%;
+				height: 40%;
+			}
+			textarea{
+				width: 100%;
+				height: 100%;
+			}
+			.biome input{
+				width: 80%;
+				height: 25%;
+			}
+			.biome{
+				font-size: 3vh;
+			}
+			p#finalLog{
+				width: 100%;
+				font-size: 3vh;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="mapHolder">
+			<canvas id="map" width="1000" height="1000" ></canvas>
+		</div>
+		<div id="editor">
+			<div id="terrainScript">
+				<textarea id="textarea" value="
+if(y==0) y = 1;
+if(x==0) x = 1;
+	
+if((2*x*x+y*y)<100000) { 
+     return Math.sin((1/70)*Math.sqrt(Math.abs(2*x*x+y*y))) + 0.05*Math.sin(4*x^(Math.abs(y-x)));
+}else{
+     return 0.05*Math.sin(4*x^(Math.abs(y-x))) + Math.sin((2*x+y)/700) + Math.sin((2*y-x)/750);
+}">if(y==0) y = 1;
+if(x==0) x = 1;
+	
+if((2*x*x+y*y)<100000) { 
+     return Math.sin((1/70)*Math.sqrt(Math.abs(2*x*x+y*y))) + 0.05*Math.sin(4*x^(Math.abs(y-x)));
+}else{
+     return 0.05*Math.sin(4*x^(Math.abs(y-x))) + Math.sin((2*x+y)/700) + Math.sin((2*y-x)/750);
+}</textarea>
+			</div>
+			<div id="terrainArea">
+				<center>
+					Rock <br>
+					<input id="rock" value="1"><br>
+					Grass <br>
+					<input id="grass" value="0"><br>
+					Sand <br>
+					<input id="sand" value="-0.8"><br>
+					Water
+			</div>
+			<div id="generate">
+				<form>
+					x1: <input id="x1" value="-100"> x2: <input id="x2" value="100"><br>
+					y1: <input id="y1" value="-100"> y2: <input id="y2" value="100"><br>
+					block size: <input id="block_size" value="1"> <br>
+					<input type="radio" name="visual" id="bw" value="bw" checked> B&W <br>
+					<input type="radio" name="visual" value="biome"> Biome <br>
+					<input type="button" onclick="generate()" value="Generate">
+				</form>
+				<p id="finalLog">
+					
+				</p>
+			</div>
+		</div>
+		<script id="formula">
+			function formula(x, y){
+				return Math.sin(x*y)
+			}
+		</script>
+		<script>
+			var canvas = document.getElementById("map");
+			var ctx = canvas.getContext("2d");
+			
+			var previousMin = -1;
+			var previousMax = 1;
+		
+			function generate(){
+				var x1 = parseInt(document.getElementById("x1").value);
+				var y1 = parseInt(document.getElementById("y1").value);
+				var x2 = parseInt(document.getElementById("x2").value);
+				var y2 = parseInt(document.getElementById("y2").value);
+				
+				var block_size = parseInt(document.getElementById("block_size").value);
+				
+				var script = document.getElementById("textarea").value;
+				
+				var rock = Number(document.getElementById("rock").value);
+				var grass = Number(document.getElementById("grass").value);
+				var sand = Number(document.getElementById("sand").value);
+				
+				console.log(rock + ", " + grass + ", " + sand);
+				
+				var xdist = Math.round(x2 - x1);
+				var ydist = Math.round(y2 - y1);
+				
+				var xrectSize = canvas.width/xdist;
+				var yrectSize = canvas.height/ydist;
+								
+				document.getElementById("formula").innerHTML = eval("function formula(x, y){ " + script + "}");
+				
+				ctx.clearRect(0, 0, canvas.width, canvas.height)
+				var max = 0;
+				var min = 0;
+				
+				
+				for (i = 0; i < xdist; i += block_size) {
+					for (j = 0; j < ydist; j += block_size) {
+						var x = i + x1;
+						var y = j + y1;
+						var n = formula(x, y);
+						
+						if(n > max) max = n;
+						if(n < min) min = n;
+						
+						if(document.getElementById("bw").checked){ //Black and White
+							n = (n-previousMin)/(previousMax-previousMin);
+							n = n*255;
+							//n = 255 - n;
+							ctx.fillStyle = "rgb(" + n + ", " + n + ", " + n + ")";
+						}else{ //Biomes
+							ctx.fillStyle = "#000"; //null
+							if(n > rock) ctx.fillStyle = "#bfbfbf"; //rock
+							if(n > grass && n <= rock) ctx.fillStyle = "#33cc33"; //grass
+							if(n > sand && n <= grass) ctx.fillStyle = "#ffcc00"; //sand
+							if(n <= sand) ctx.fillStyle = "#0039e6"; //water
+						}
+						
+						ctx.fillRect(i*xrectSize, j*yrectSize, xrectSize*block_size, yrectSize*block_size);
+					}
+				}
+				
+				//Final Log
+				document.getElementById("finalLog").innerHTML = "New Map Loaded: <br>" + "The Max Value was: " + max + "<br>The Minimum Value was: " + min;
+				previousMin = min;
+				previousMax = max;
+				
+			}
+			
+			for (i = 0; i < 200; i++) { //Initial Load
+					for (j = 0; j < 200; j++) {
+						var n = formula(i + -100, j + -100);
+						
+						//Black and White
+						n = (n+1)/2;
+						n = n*255;
+						//n = 255 - n;
+												
+						ctx.fillStyle = "rgb(" + n + ", " + n + ", " + n + ")";
+						ctx.fillRect(i*(1000/200), j*(1000/200), (1000/200), (1000/200));
+					}
+				}
+		</script>
+	</body>
+</html>
